@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streak Milestones Timeline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            padding: 20px;
+            background: #ffffff;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .top-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: nowrap;
+        }
+
+        .date-display {
+            text-align: left;
+            padding: 6px 12px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            flex: 0 0 auto;
+            min-width: 160px;
+        }
+        
+        .date-display .today {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .date-display .current-date {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+
+        .countdown-display {
+            text-align: left;
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #FFB347 0%, #FF7F50 50%, #FF4500 100%);
+            border-radius: 8px;
+            color: white;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        
+
+        .countdown-display .countdown-title {
+            font-size: 14px;
+            margin-bottom: 8px;
+            opacity: 0.95;
+        }
+
+        .countdown-display .countdown-timer {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: nowrap;
+            overflow: hidden;
+        }
+        
+        .countdown-unit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .countdown-number {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .countdown-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            margin-top: 4px;
+            opacity: 0.85;
+        }
+        
+        .countdown-passed {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+        }
+        
+        /* Tabs Styling */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 15px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .tab:hover {
+            color: #333;
+            background-color: #f5f5f5;
+            border-radius: 5px 5px 0 0;
+        }
+        
+        .tab.active {
+            color: #333;
+            border-bottom-color: #0066cc;
+            font-weight: 500;
+            background-color: transparent;
+        }
+
+        /* Special Styling for the Static Chess Badge */
+        .special-badge {
+            margin-left: auto; /* Push to right or keep inline */
+            padding: 8px 15px;
+            background: #2d3436;
+            color: #dfe6e9;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid #636e72;
+            cursor: default;
+        }
+        
+        .special-badge .highlight {
+            color: #fab1a0;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: #f5f5f5;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #fafafa;
+        }
+        
+        .platform-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        
+        .platform-logo {
+            font-size: 24px;
+        }
+        
+        .platform-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .current-streak {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e0e0e0;">
+            <div style="flex: 1;">
+                <div style="font-size: 24px; color: #222; font-weight: 600; margin-bottom: 4px;">
+                    VARUN D MAGAR <span style="font-size: 16px; color: #666; font-weight: 400;">greets you with Namaste</span>
+                </div>
+                <div style="font-size: 14px; color: #666; font-style: italic;">
+                    Tracking daily streaks across platforms for career & professional growth
+                </div>
+            </div>
+            <div style="font-size: 32px;">
+                🙏
+            </div>
+        </div>
+        <h1 style="font-size: 26px;">Streak Milestones Timeline</h1>
+        
+        <div class="top-row">
+            <div class="date-display">
+                <div class="today">Today's Date</div>
+                <div class="current-date" id="currentDate"></div>
+            </div>
+
+            <div class="countdown-display" id="countdownDisplay">
+                <div class="countdown-title">Everything clicks into place within...</div>
+
+                <div class="countdown-timer" id="countdownTimer"></div>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('gfg')">🔥 GFG (<span id="tab-gfg"></span>)</button>
+            <button class="tab" onclick="showTab('weather')">☁️ Weather (<span id="tab-weather"></span>)</button>
+            <button class="tab" onclick="showTab('github')">💻 GitHub (<span id="tab-github"></span>)</button>
+            <button class="tab" onclick="showTab('leetcode')">💡 LeetCode (<span id="tab-leetcode"></span>)</button>
+            <button class="tab" onclick="showTab('unstop')">🚀 Unstop (<span id="tab-unstop"></span>)</button>
+            <button class="tab" onclick="showTab('microsoft')">🎁 Microsoft (<span id="tab-microsoft"></span>)</button>
+            <button class="tab" onclick="showTab('puzzles')">🧩 Puzzles (<span id="tab-puzzles"></span>)</button>
+            
+            <button class="tab" onclick="showTab('combined')">📊 Combined</button>
+
+            <div class="special-badge">
+                ♟️ Chess: <span id="chess-main-val">875</span> 
+                <span style="margin: 0 5px; opacity: 0.5;">|</span> 
+                <span class="highlight" id="chess-remaining">...</span> to 1000
+            </div>
+        </div>
+        
+        <div id="gfg" class="tab-content active">
+            <div class="platform-header">
+                <span class="platform-logo">🔥</span>
+                <div>
+                    <div class="platform-name">GeeksforGeeks</div>
+                    <div class="current-streak">Current streak: <span class="streak-val"></span> days</div>
+                </div>
+            </div>
+            <table>
+                <thead><tr><th>Milestone</th><th>Days Remaining</th><th>Estimated Date</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <div id="weather" class="tab-content">
+            <div class="platform-header">
+                <span class="platform-logo">☁️</span>
+                <div>
+                    <div class="platform-name">Weather Reporting</div>
+                    <div class="current-streak">Current streak: <span class="streak-val"></span> days</div>
+                </div>
+            </div>
+            <table>
+                <thead><tr><th>Milestone</th><th>Days Remaining</th><th>Estimated Date</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <div id="github" class="tab-content">
+            <div class="platform-header">
+                <span class="platform-logo">💻</span>
+                <div>
+                    <div class="platform-name">GitHub</div>
+                    <div class="current-streak">Current streak: <span class="streak-val"></span> days</div>
+                </div>
+            </div>
+            <table>
+                <thead><tr><th>Milestone</th><th>Days Remaining</th><th>Estimated Date</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <div id="leetcode" class="tab-content">
+            <div class="platform-header">
+                <span class="platform-logo">💡</span>
+                <div>
+                    <div class="platform-name">LeetCode</div>
+                    <div class="current-streak">Current streak: <span class="streak-val"></span> days</div>
+                </div>
+            </div>
+            <table>
+                <thead><tr><th>Milestone</th><th>Days Remaining</th><th>Estimated Date</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <div id="unstop" class="tab-content">
+            <div class="platform-header">
+                <span class="platform-logo">🚀</span>
+                <div>
+                    <div class="platform-name">Unstop</div>
+                    <div class="current-streak">Current streak: <span class="streak-val"></span> days</div>
+                </div>
+            </div>
+            <table>
+                <thead><tr><th>Milestone</th><th>Days Remaining</th><th>Estimated Date</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <div id="microsoft" class="tab-content">
+            <div class="platform-header">
+                <span class="platform-logo">🎁</span>
+                <div>
+                    <div class="platform-name">Microsoft Rewards</div>
+                    <div class="current-streak">Current streak: <span class="streak-val"></span> days</div>
+                </div>
+            </div>
+            <table>
+                <thead><tr><th>Milestone</th><th>Days Remaining</th><th>Estimated Date</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div id="puzzles" class="tab-content">
+            <div class="platform-header">
+                <span class="platform-logo">🧩</span>
+                <div>
+                    <div class="platform-name">Chess Puzzles</div>
+                    <div class="current-streak">Current streak: <span class="streak-val"></span> days</div>
+                </div>
+            </div>
+            <table>
+                <thead><tr><th>Milestone</th><th>Days Remaining</th><th>Estimated Date</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <div id="combined" class="tab-content">
+            <div class="platform-header">
+                <span class="platform-logo">📊</span>
+                <div>
+                    <div class="platform-name">Combined Timeline</div>
+                    <div class="current-streak">All milestones sorted by date</div>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Platform</th>
+                        <th>Milestone</th>
+                        <th>Days from Today</th>
+                    </tr>
+                </thead>
+                <tbody id="combinedTable"></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        // Base date: January 16, 2026
+        const BASE_DATE = new Date('2026-01-16');
+        
+        // Initial streaks relative to Jan 16, 2026.
+        // NOTE: Adjusted Chess values so they equal 368 and 875 on Jan 27 (11 days later).
+        const INITIAL_STREAKS = {
+            gfg: 377,
+            weather: 193,
+            github: 384,
+            leetcode: 374,
+            unstop: 181,
+            microsoft: 32,
+            puzzles: 357, // Will be 368 on Jan 27
+            chessMain: 864 // Will be 875 on Jan 27
+        };
+        
+        // Target date for countdown
+        const TARGET_DATE = new Date('2028-10-16');
+        
+        // Calculate days passed since base date
+        function getDaysPassed() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const base = new Date(BASE_DATE);
+            base.setHours(0, 0, 0, 0);
+            const diffTime = today - base;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        }
+        
+        // Get current streaks
+        function getCurrentStreaks() {
+            const daysPassed = getDaysPassed();
+            return {
+                gfg: INITIAL_STREAKS.gfg + daysPassed,
+                weather: INITIAL_STREAKS.weather + daysPassed,
+                github: INITIAL_STREAKS.github + daysPassed,
+                leetcode: INITIAL_STREAKS.leetcode + daysPassed,
+                unstop: INITIAL_STREAKS.unstop + daysPassed,
+                microsoft: INITIAL_STREAKS.microsoft + daysPassed,
+                puzzles: INITIAL_STREAKS.puzzles + daysPassed,
+                chessMain: INITIAL_STREAKS.chessMain + daysPassed
+            };
+        }
+        
+        // Format date as "Month Day, Year"
+        function formatDate(date) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+        
+        // Calculate milestone date from today
+        function getMilestoneDate(daysFromNow) {
+            const today = new Date();
+            const milestoneDate = new Date(today);
+            milestoneDate.setDate(today.getDate() + daysFromNow);
+            return formatDate(milestoneDate);
+        }
+        
+        // Update countdown timer
+        function updateCountdown() {
+            const now = new Date();
+            const diff = TARGET_DATE - now;
+            
+            const countdownDisplay = document.getElementById('countdownDisplay');
+            const countdownTimer = document.getElementById('countdownTimer');
+            
+            if (diff < 0) {
+                // Date has passed
+                countdownDisplay.classList.add('countdown-passed');
+                const daysPassed = Math.floor(Math.abs(diff) / (1000 * 60 * 60 * 24));
+                countdownTimer.innerHTML = `
+                    <div class="countdown-unit">
+                        <div class="countdown-number">${daysPassed}</div>
+                        <div class="countdown-label">Days Passed</div>
+                    </div>
+                `;
+            } else {
+                // Date is in the future
+                countdownDisplay.classList.remove('countdown-passed');
+                
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                countdownTimer.innerHTML = `
+                    <div class="countdown-unit">
+                        <div class="countdown-number">${days}</div>
+                        <div class="countdown-label">Days</div>
+                    </div>
+                    <div class="countdown-unit">
+                        <div class="countdown-number">${hours}</div>
+                        <div class="countdown-label">Hours</div>
+                    </div>
+                    <div class="countdown-unit">
+                        <div class="countdown-number">${minutes}</div>
+                        <div class="countdown-label">Minutes</div>
+                    </div>
+                    <div class="countdown-unit">
+                        <div class="countdown-number">${seconds}</div>
+                        <div class="countdown-label">Seconds</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Update current date display
+        function updateDateDisplay() {
+            const today = new Date();
+            document.getElementById('currentDate').textContent = formatDate(today);
+        }
+        
+        // Generate milestones for a platform
+        function generateMilestones(currentStreak, milestones) {
+            return milestones.map(milestone => {
+                const daysRemaining = milestone - currentStreak;
+                return {
+                    milestone: milestone,
+                    daysRemaining: daysRemaining,
+                    date: getMilestoneDate(daysRemaining)
+                };
+            }).filter(m => m.daysRemaining > 0);
+        }
+        
+        // Update tables
+        function updateTables() {
+            const streaks = getCurrentStreaks();
+            
+            // 1. Update Tab Labels
+            document.getElementById('tab-gfg').textContent = streaks.gfg;
+            document.getElementById('tab-weather').textContent = streaks.weather;
+            document.getElementById('tab-github').textContent = streaks.github;
+            document.getElementById('tab-leetcode').textContent = streaks.leetcode;
+            document.getElementById('tab-unstop').textContent = streaks.unstop;
+            document.getElementById('tab-microsoft').textContent = streaks.microsoft;
+            document.getElementById('tab-puzzles').textContent = streaks.puzzles;
+            
+            // 2. Update Special Chess Badge
+            document.getElementById('chess-main-val').textContent = streaks.chessMain;
+            const chessRemaining = 1000 - streaks.chessMain;
+            document.getElementById('chess-remaining').textContent = chessRemaining > 0 ? `${chessRemaining} Days` : "Goal Met!";
+
+            // 3. Update Table Contents
+            const commonMilestones = [400, 500, 600, 700, 750, 800, 900, 1000];
+            
+            updateTable('gfg', generateMilestones(streaks.gfg, commonMilestones), streaks.gfg);
+            updateTable('weather', generateMilestones(streaks.weather, [200, 300, 400, ...commonMilestones]), streaks.weather);
+            updateTable('github', generateMilestones(streaks.github, commonMilestones), streaks.github);
+            updateTable('leetcode', generateMilestones(streaks.leetcode, commonMilestones), streaks.leetcode);
+            updateTable('unstop', generateMilestones(streaks.unstop, [200, 300, 400, ...commonMilestones]), streaks.unstop);
+            updateTable('microsoft', generateMilestones(streaks.microsoft, [180, 365, 999]), streaks.microsoft);
+            
+            // Update Puzzles Table
+            updateTable('puzzles', generateMilestones(streaks.puzzles, [400, 500, 600, 700, 800, 900, 1000]), streaks.puzzles);
+            
+            // Update combined table
+            updateCombinedTable(streaks);
+        }
+        
+        function updateTable(platform, milestones, currentStreak) {
+            const table = document.querySelector(`#${platform} tbody`);
+            // Update current streak text inside the tab content
+            document.querySelector(`#${platform} .streak-val`).textContent = currentStreak;
+            
+            table.innerHTML = '';
+            milestones.forEach(m => {
+                const row = table.insertRow();
+                row.innerHTML = `
+                    <td>${m.milestone}</td>
+                    <td>${m.daysRemaining}</td>
+                    <td>${m.date}</td>
+                `;
+            });
+        }
+        
+        function updateCombinedTable(streaks) {
+            const allMilestones = [];
+            const standardLevels = [400, 500, 600, 700, 750, 800, 900, 1000];
+            
+            // Helper to push milestones
+            const pushM = (list, name, streak) => {
+                generateMilestones(streak, list).forEach(m => {
+                    allMilestones.push({...m, platform: name, sortDate: new Date(Date.now() + m.daysRemaining * 24 * 60 * 60 * 1000)});
+                });
+            };
+
+            pushM(standardLevels, '🔥 GFG', streaks.gfg);
+            pushM([200, 300, 400, ...standardLevels], '☁️ Weather', streaks.weather);
+            pushM(standardLevels, '💻 GitHub', streaks.github);
+            pushM(standardLevels, '💡 LeetCode', streaks.leetcode);
+            pushM([200, 300, 400, ...standardLevels], '🚀 Unstop', streaks.unstop);
+            pushM([100, 200, 300, ...standardLevels], '🎁 Microsoft', streaks.microsoft);
+            pushM(standardLevels, '🧩 Puzzles', streaks.puzzles);
+            
+            // Sort by date
+            allMilestones.sort((a, b) => a.sortDate - b.sortDate);
+            
+            const tbody = document.getElementById('combinedTable');
+            tbody.innerHTML = '';
+            
+            allMilestones.forEach(m => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${m.date}</td>
+                    <td>${m.platform}</td>
+                    <td>${m.milestone}</td>
+                    <td>${m.daysRemaining}</td>
+                `;
+            });
+        }
+        
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // Handle the clicked tab styling
+            const clickedTab = Array.from(tabs).find(t => t.onclick.toString().includes(tabName));
+            if(clickedTab) clickedTab.classList.add('active');
+            
+            document.getElementById(tabName).classList.add('active');
+        }
+        
+        // Initialize on page load
+        updateDateDisplay();
+        updateCountdown();
+        updateTables();
+        
+        // Update countdown every second
+        setInterval(updateCountdown, 1000);
+        
+        // Update tables every hour to catch day changes
+        setInterval(() => {
+            updateDateDisplay();
+            updateTables();
+        }, 3600000);
+    </script>
+</body>
+</html>
